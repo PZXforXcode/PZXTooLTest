@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Decrypt and Encrypt AES</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+  <script>
+    const secretKeys = {
+      development: 'PCsemiceCore', // 替换为开发环境的密钥
+      testing: 'PCsemiceTest', // 替换为测试环境的密钥
+      staging: 'PCsemiceCore', // 替换为预发布环境的密钥
+      production: 'ProdPingalax' // 替换为正式环境的密钥
+    };
+
+    function getSecretKey() {
+      const environment = document.getElementById('environment').value;
+      return secretKeys[environment];
+    }
+
+    function decrypt(word) {
+      try {
+        const secretKey = getSecretKey();
+        const key = CryptoJS.enc.Utf8.parse(secretKey);
+        const decrypt = CryptoJS.AES.decrypt(word, key, {
+          mode: CryptoJS.mode.ECB,
+          padding: CryptoJS.pad.Pkcs7,
+        });
+        const decryptedText = CryptoJS.enc.Utf8.stringify(decrypt);
+        if (!decryptedText) {
+          throw new Error("Decryption failed");
+        }
+        return decryptedText;
+      } catch (error) {
+        return "解密失败";
+      }
+    }
+
+    function encrypt(word) {
+      const secretKey = getSecretKey();
+      const key = CryptoJS.enc.Utf8.parse(secretKey);
+      const srcs = CryptoJS.enc.Utf8.parse(word);
+      const encrypted = CryptoJS.AES.encrypt(srcs, key, {
+        mode: CryptoJS.mode.ECB,
+        padding: CryptoJS.pad.Pkcs7,
+      });
+      return encrypted.toString();
+    }
+
+    function handleDecrypt() {
+      const encryptedText = document.getElementById('encryptedText').value;
+      const decryptedText = decrypt(encryptedText);
+      document.getElementById('resultDecrypt').innerText = decryptedText;
+    }
+
+    function handleEncrypt() {
+      const plainText = document.getElementById('plainText').value;
+      const encryptedText = encrypt(plainText);
+      document.getElementById('resultEncrypt').innerText = encryptedText;
+    }
+  </script>
+</head>
+<body>
+  <h1>Userid加解密工具</h1>
+  <div>
+    <label for="environment">选择环境:</label>
+    <select id="environment">
+      <option value="development">开发环境</option>
+      <option value="testing">测试环境</option>
+      <option value="staging">预发布环境</option>
+      <option value="production">正式环境</option>
+    </select>
+  </div>
+  <div>
+    <label for="encryptedText">输入加密userid:</label>
+    <input type="text" id="encryptedText" placeholder="输入加密字符串">
+    <button onclick="handleDecrypt()">解密</button>
+  </div>
+  <div>
+    <h2>解密的字符串:</h2>
+    <p id="resultDecrypt"></p>
+  </div>
+  <div>
+    <label for="plainText">输入明文userid:</label>
+    <input type="text" id="plainText" placeholder="输入明文字符串">
+    <button onclick="handleEncrypt()">加密</button>
+  </div>
+  <div>
+    <h2>加密的字符串:</h2>
+    <p id="resultEncrypt"></p>
+  </div>
+</body>
+</html>
